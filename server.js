@@ -26,6 +26,18 @@ function admin(req, res, next) { if (!cookie(req, 'wolf_admin') || !sessions.has
 app.use(express.json({ limit: '1mb' })); app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(uploadDir, { maxAge: '7d' })); app.use(express.static(path.join(root, 'public')));
 app.get('/api/media', (_req, res) => res.json(readMedia().filter(x => x.published !== false)));
+const repositoryCache = { value: null, expires: 0 };
+app.get('/api/repository', async (_req, res) => {
+  if (repositoryCache.value && repositoryCache.expires > Date.now()) return res.json(repositoryCache.value);
+  try {
+    const response = await fetch('https://api.github.com/repos/WOLVAREX/silntwolf', { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'WolfBot-Docs' } });
+    if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+    const repo = await response.json();
+    repositoryCache.value = { name: repo.full_name, url: repo.html_url, description: repo.description, stars: repo.stargazers_count, forks: repo.forks_count };
+    repositoryCache.expires = Date.now() + 5 * 60 * 1000;
+    res.json(repositoryCache.value);
+  } catch (error) { res.status(502).json({ error: 'Repository statistics are temporarily unavailable' }); }
+});
 app.get('/api/admin/me', admin, (_req, res) => res.json({ authenticated: true, email: adminEmail }));
 app.post('/api/admin/login', (req, res) => {
   if (!adminEmail || !adminPassword || !sessionSecret) return res.status(503).json({ error: 'Admin credentials are not configured' });
