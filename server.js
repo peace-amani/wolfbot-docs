@@ -30,7 +30,7 @@ const repositoryCache = { value: null, expires: 0 };
 app.get('/api/repository', async (_req, res) => {
   if (repositoryCache.value && repositoryCache.expires > Date.now()) return res.json(repositoryCache.value);
   try {
-    const response = await fetch('https://api.github.com/repos/WOLVAREX/silntwolf', { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'WolfBot-Docs' } });
+    const response = await fetch('https://api.github.com/repos/WOLVAREX/silentwolf', { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'WolfBot-Docs' } });
     if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
     const repo = await response.json();
     repositoryCache.value = { name: repo.full_name, url: repo.html_url, description: repo.description, stars: repo.stargazers_count, forks: repo.forks_count };
