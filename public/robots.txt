@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wolfbot-docs.wolvarex.com/sitemap.xml
